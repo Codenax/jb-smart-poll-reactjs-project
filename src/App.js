@@ -19,19 +19,23 @@ class App extends React.Component {
     poll.id = shortid.generate()
     poll.created = new Date()
     poll.totalVote = 0
-    poll.opinions = []
-    this.setState({
-      polls: this.state.polls.concat(poll)
-    })
+    poll.opinions= []
+     this.setState({
+       polls : this.state.polls.concat(poll)
+     })
+  
   }
 
 
-  updatePoll = updatePoll => {
-    const polls = [...this.state.polls]
-    const poll = polls.find(p => p.id === this.updatePoll.id)
-    poll.title = updatePoll.title
-    poll.description = updatePoll.description
-    poll.opinions = updatePoll.opinions
+  updatePoll = updatedPoll => {
+    const polls = [...this.state.polls];
+    const poll = polls.find(p => p.id === updatedPoll.id);
+    
+    poll.title = updatedPoll.title;
+    poll.description = updatedPoll.description;
+    poll.options = updatedPoll.options;
+   
+    this.setState({poll});
   };
 
 
@@ -48,34 +52,50 @@ class App extends React.Component {
 
 
   handleSearch = searchTerm => {
-
+    this.setState({
+      searchTerm
+    });
   }
+
+  performSearch = ()=>{
+    return this.state.polls.filter(poll =>
+      poll.title
+        .toLowerCase()
+        .includes(this.state.searchTerm.toLowerCase()))
+  }
+
+
   getOpinion = response => {
-    const { polls } = this.state
-    const poll = polls.find(p => p.id === response.pollId)
-    const option = poll.opinions.find(o => o.id === response.slectedOption)
-    poll.totalVote++
-    option.totalVote++
+    const { polls } = this.state;
+    const poll = polls.find(p => p.id === response.pollId);
+
+
+    const option = poll.options.find(o => o.id === response.selectedOption);
+    poll.totalVote++;
+    option.vote++;
 
     const opinion = {
       id: shortid.generate(),
       name: response.name,
       selectedOption: response.selectedOption
+    };
 
-    }
-    poll.opinions.push(opinion)
+    poll.opinions.push(opinion);
     this.setState({ polls });
   };
 
 
   render() {
+    
+    const polls = this.performSearch()
+
     return (
       <div>
         <Container className='my-5'>
           <Row>
             <Col md={4}>
               <Sitebar
-                polls={this.state.polls}
+                polls={polls}
                 searchTerm={this.state.searchTerm}
                 handleSearch={this.handleSearch}
                 selectPoll={this.selectPoll}
